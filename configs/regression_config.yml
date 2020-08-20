@@ -1,0 +1,15 @@
+noisy_sin:
+  networkType: 'feedforward'
+  input_shape: 1
+  output_shape: 1
+  hidden_layers: 1
+  nodes: [5]
+  activation: 'relu'
+  loss: 'mse'
+  kernel_init: 'glorot_uniform'
+  kernel_reg: null
+  optimizer: 'RMSProp'
+  epochs: 100
+  lr: 0.001
+
+

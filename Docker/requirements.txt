@@ -1,0 +1,33 @@
+# make sure there were installed by the base
+numpy
+tensorflow-gpu
+
+# general scientific/engineering libraries
+matplotlib
+pandas
+scikit-learn
+scipy
+seaborn
+statsmodels
+# reading data
+h5py
+xlrd
+
+# tensorflow extras
+tensorflow-addons
+tensorflow-probability
+
+# keras extras
+Pillow
+pydot
+
+# ray requirements
+ray[tune]
+joblib
+psutil
+
+# utilities.
+# tqdm is for timing loops and is very useful
+tqdm
+debugpy
+
