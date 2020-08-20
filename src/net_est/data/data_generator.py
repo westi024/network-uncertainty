@@ -22,14 +22,14 @@ class abs_value_dist(stats.rv_continuous):
         return np.where(x < 0.0, self.neg_cdf(x), self.pos_cdf(x))
 
     @staticmethod
-    def neg_cdf(self, x_in):
+    def neg_cdf(x_in):
         if x_in < -1.0:
             return 0.0
         else:
             return (-1*x_in**2.0 / 2.0) + (1/2)
 
     @staticmethod
-    def pos_cdf(self, x_in):
+    def pos_cdf(x_in):
         if 0.0 < x_in < 1.0:
             return ((x_in**2) / 2.0) + (1/2)
         else:
