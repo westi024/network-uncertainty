@@ -3,10 +3,14 @@
 This function creates the training data and fits multiple neural network models.
 
 """
+
 import numpy as np
+import ray
+import yaml
 from sklearn.model_selection import train_test_split, KFold
 
 from net_est.data.data_generator import generate_training_data
+from net_est.utils.resource_config import configure_cpu_gpu_resources
 
 
 def load_training_val_data(n_models=5):
@@ -53,6 +57,27 @@ def load_training_val_data(n_models=5):
 
 
 # Set up Ray to train multiple models at once, varying only the random weight initialization
+# Check hardware resources and call ray.init() and build train_spec dictionary
+gpu_per_job, num_gpus, num_cpus, object_store_memory = configure_cpu_gpu_resources()
+
+# This will be removed later
+smoke_test = True
+
+ray.init(num_cpus=num_cpus,
+         num_gpus=num_gpus,
+         object_store_memory=object_store_memory,
+         plasma_directory="/tmp",
+         local_mode=smoke_test)
+
+# Get the model config
+with open("/configs/regression_config.yml") as f:
+    regression_config = yaml.safe_load(f)
+model_config = regression_config['noisy_sin']
+
+# Build the train_spec dict
+
+
+# Then load training data, don't need object store here, data is small
 
 if __name__ == '__main__':
     load_training_val_data()

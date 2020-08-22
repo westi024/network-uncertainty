@@ -9,6 +9,7 @@ services:
           - "${DEV_CODE}:/code"
           - "${DEV_DATA}:/data"
           - "${DEV_IMAGE}:/images"
+          - "${DEV_CONFIG}:/configs"
         environment:
             NVIDIA_VISIBLE_DEVICES: 0 # or "all" or "0" or "0,1" etc.
             TF_FORCE_GPU_ALLOW_GROWTH: 'true'

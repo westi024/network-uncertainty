@@ -11,5 +11,6 @@ noisy_sin:
   optimizer: 'RMSProp'
   epochs: 100
   lr: 0.001
+  n_models: 5
 
 
