@@ -71,9 +71,9 @@ def noise_function(x):
         The error values to add to each truth value
 
     """
-
-    sigma_e_squared = 0.0025 + 0.0025 * (1 + np.sin(np.pi * x))**2
-    return np.random.normal(loc=0.0, scale=sigma_e_squared)
+    x_ = np.pi * x
+    sigma_e_squared = 0.0025 + (0.0025 * (1 + np.sin(x_))**2)
+    return np.random.normal(loc=0.0, scale=sigma_e_squared), sigma_e_squared
 
 
 def generate_training_data(n_samples=50, create_plot=False):
@@ -107,23 +107,28 @@ def generate_training_data(n_samples=50, create_plot=False):
     # Sample from the distribution
     x_sampled = x_dist.rvs(size=n_samples)
     y = target_function(x_sampled)
-    sigma_e_squared = noise_function(x_sampled)
-    y_e = y + sigma_e_squared
+    sigma_e_squared_sampled, sigma_e_squared = noise_function(x_sampled)
+    y_e = y + sigma_e_squared_sampled
 
-    # Create 4 Panel Plot
+    # Create 2 Panel Plot
+    ix = np.argsort(x_sampled)
     if create_plot:
-        fig, axes = plt.subplots(1, 2, figsize=(15, 5))
+        fig, axes = plt.subplots(1, 3, figsize=(15, 5))
         ax = axes.ravel()
         ax[0].hist(x_sampled, bins=100)
         ax[0].set_xlabel('x')
         x_grid = np.arange(-1, 1.0, 0.05)
-        ax[1].plot(x_grid, target_function(x_grid), 'k-')
+        ax[1].plot(x_grid, target_function(x_grid), 'k-', lw=0.5)
         ax[1].scatter(x_sampled, y_e, c='r', s=4)
         ax[1].set_ylim([-1, 1])
+        ax[2].plot(x_sampled[ix], sigma_e_squared[ix], 'k-', lw=0.5)
+        ax[2].set_ylabel(r"$\sigma^2$")
+        ax[2].set_ylim([0, 0.02])
+        plt.tight_layout()
         plt.savefig(os.path.join("/images", "training_data.png"))
 
     return x_sampled, y_e
 
 
 if __name__ == '__main__':
-    x_data, y_data = generate_training_data(n_samples=100, create_plot=True)
+    x_data, y_data = generate_training_data(n_samples=1000, create_plot=True)

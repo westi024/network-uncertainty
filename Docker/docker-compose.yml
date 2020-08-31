@@ -5,11 +5,13 @@ services:
         build: 
             context: .
             dockerfile: net_est.dockerfile
+        shm_size: '10gb'
         volumes: 
           - "${DEV_CODE}:/code"
           - "${DEV_DATA}:/data"
           - "${DEV_IMAGE}:/images"
           - "${DEV_CONFIG}:/configs"
+          - "${DEV_RESULTS}:/results"
         environment:
             NVIDIA_VISIBLE_DEVICES: 0 # or "all" or "0" or "0,1" etc.
             TF_FORCE_GPU_ALLOW_GROWTH: 'true'
