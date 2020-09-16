@@ -27,6 +27,7 @@ from net_est.utils.timing import timer
 class bootstrap_trainer(tune.Trainable):
     @timer
     def setup(self, config):
+        """ Loads the training data and builds the model """
         # Set the model name so we can index the correct K fold
         self.model_name = config['model_name']
 
@@ -37,6 +38,7 @@ class bootstrap_trainer(tune.Trainable):
         self.model = net_build.noisy_sin_network(config)
 
     def step(self):
+        """ Performs model training """
         self.model.fit(self.train_data,
                        validation_data=self.val_data,
                        epochs=self.config.get('epochs', 10))
@@ -46,6 +48,7 @@ class bootstrap_trainer(tune.Trainable):
         return {'mse': error}
 
     def load_data(self, config):
+        """ Uses the model name to load a specific fold of the training data """
         x_train, y_train, x_val, y_val = [config['training_data'][self.model_name][x] for x in ['x_train',
                                                                                                 'y_train',
                                                                                                 'x_val',
@@ -63,11 +66,13 @@ class bootstrap_trainer(tune.Trainable):
         return train_data, val_data
 
     def save_checkpoint(self, tmp_checkpoint_dir):
+        """ Saves the model during this training iteration as model.h5"""
         file_path = tmp_checkpoint_dir + "/model.h5"
         self.model.save_weights(file_path)
         return file_path
 
     def load_checkpoint(self, path):
+        """ Loads a model using the parameters saved in params.json and the path"""
         del self.model
         with open(os.path.join(path, "params.json"), 'r') as f:
             config = json.load(f)
@@ -228,10 +233,25 @@ def save_model_results(model_dir):
     ax[0].legend(fontsize=18)
     ax[1].scatter(X[ix], var_boot[ix], c='r', s=4, label=r'\hat{\sigma}^2')
     ax[1].plot(X[ix], noise_function(X[ix])[1], 'k-', lw=0.5, label=r'\sigma^2')
+    print(f"Saving results to {model_dir}")
     plt.savefig(os.path.join(model_dir, 'ensemble_pred.png'))
 
 
 def bootstrap_modeling(analyze_results=False, model_dir=None):
+    """ Main function for fitting and analyzing bootstrap models
+
+    Parameters
+    ----------
+    analyze_results: bool
+        Flag indicating if we only want to analyze previously trained model results
+    model_dir: path
+        The path to the model directory for analyzing results.  If analyze_results=False, this isn't used
+
+    Returns
+    -------
+    None
+
+    """
     if analyze_results:
         if model_dir is None:
             raise ValueError("Must provide a model directory to analyze results!")
