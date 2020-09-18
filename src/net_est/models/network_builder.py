@@ -59,7 +59,7 @@ def get_best_checkpoint_dir(model_directory, metric='mse', mode='min'):
     return checkpoint_dir[best_checkpoint_ix]
 
 
-def noisy_sin_network(params):
+def noisy_sin_network(params, use_dropout=False, dropout_rate=0.2):
     """ Builds a basic regression network
 
     Parameters
@@ -85,6 +85,8 @@ def noisy_sin_network(params):
                          use_bias=True,
                          kernel_initializer=params['kernel_init'],
                          kernel_regularizer=params['kernel_reg'])(h)
+        if use_dropout:
+            h = layers.Dropout(dropout_rate)(h, training=True)
 
     # Build the output layer
     output_shape = params['output_shape']
@@ -94,7 +96,9 @@ def noisy_sin_network(params):
                                 kernel_initializer=params['kernel_init'],
                                 kernel_regularizer=params['kernel_reg'])(h)
 
-    model = keras.Model(inputs=network_input, outputs=output_layer, name='noisy_sin_model')
+    model = keras.Model(inputs=network_input,
+                        outputs=output_layer,
+                        name='noisy_sin_model')
     print(model.summary())
     loss_function = get_loss_function(params)
     optimizer = get_optimizer(params)

@@ -2,6 +2,7 @@
 import tensorflow as tf
 import psutil
 import os
+import tempfile
 from tensorflow.python.client import device_lib
 
 
@@ -34,3 +35,37 @@ def configure_cpu_gpu_resources():
         gpu_per_job = 0.5
 
     return gpu_per_job, num_gpus, num_cpus, object_store_memory
+
+
+def create_results_directory(config_name):
+    """ Creates the results directory and a random experiment name.
+
+    This function creates the folder structure necessary for saving Ray results without
+    using the default ray_results directory.
+
+    Parameters
+    ----------
+    config_name: str
+        The name of the configuration to use for creating an experiment path
+
+    Returns
+    -------
+    config_dir: Path
+        The path within the /results directory that relies on the train_spec['config']['name']
+    exp_name: str
+        Random string
+
+    """
+
+    config_dir = os.path.join(f"/results/{config_name}")
+
+    # Need a random experiment name
+    random_path = tempfile.NamedTemporaryFile()
+    exp_name = os.path.basename(random_path.name)
+
+    if os.path.exists(config_dir):
+        pass
+    else:
+        os.makedirs(config_dir)
+
+    return config_dir, exp_name

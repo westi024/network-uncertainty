@@ -13,18 +13,31 @@ import numpy as np
 import ray
 import json
 from ray import tune
-import yaml
-import tempfile
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split, KFold
+
 from net_est.data.data_generator import generate_training_data, noise_function
-from net_est.utils.resource_config import configure_cpu_gpu_resources
+from net_est.utils.resource_config import configure_cpu_gpu_resources, create_results_directory
 from net_est.models import network_builder as net_build
 from net_est.utils.timing import timer
+from net_est.utils.config_loader import load_config
 
 
 class bootstrap_trainer(tune.Trainable):
+    """  Trains and evaluates a model using the Trainable API.
+
+    Attributes
+    ----------
+    model_name: str
+        The model name used for indexing the correct fold of the training data
+    train_data: tf.data.Dataset
+
+    val_data: tf.data.Dataset
+
+    model: keras.Model
+        The model for this fold of the training data
+    """
     @timer
     def setup(self, config):
         """ Loads the training data and builds the model """
@@ -80,7 +93,7 @@ class bootstrap_trainer(tune.Trainable):
         self.model.load_weights(os.path.join(path, "model.h5"))
 
 
-def load_training_val_data(n_models=5):
+def load_training_val_data(n_models=5, model_samples=500):
     """  Calls data_generator.py to create the training data set.  Applies k-fold partitioning so models are
     trained on unique data sets.
 
@@ -88,6 +101,8 @@ def load_training_val_data(n_models=5):
     ----------
     n_models: int
         The number of models
+    model_samples: int
+        The number of samples to generate per model
 
     Returns
     -------
@@ -98,9 +113,8 @@ def load_training_val_data(n_models=5):
     if not isinstance(n_models, int):
         raise ValueError("The n_models argument must be an integer")
 
-    x, y = generate_training_data(n_samples=500*n_models)
-    x = x[:, np.newaxis]
-    y = y[:, np.newaxis]
+    x, y = generate_training_data(n_samples=model_samples*n_models)
+    x, y = [g[:, np.newaxis] for g in [x, y]]
 
     # Create a validation set we'll use for reporting errors across models
     train_x, test_x, train_y, test_y = train_test_split(x, y, test_size=0.20)
@@ -124,6 +138,23 @@ def load_training_val_data(n_models=5):
 
 
 def create_ray_train_spec(cpu_per_job=1, config_name='noisy_sin', smoke_test=False):
+    """  This configures the dictionary needed for tune.run() and calls ray.init().
+
+    Parameters
+    ----------
+    cpu_per_job: int
+        The number of cpus to use per training job
+    config_name: str
+        The name of the configuration to load from configs/regression_config.yml
+    smoke_test: bool
+        Flag indicating we're testing the code
+
+    Returns
+    -------
+    train_spec: dict
+        The dictionary passed into the tune.run().
+
+    """
     # Set up Ray to train multiple models at once, varying only the random weight initialization
     # Check hardware resources and call ray.init() and build train_spec dictionary
     gpu_per_job, num_gpus, num_cpus, object_store_memory = configure_cpu_gpu_resources()
@@ -134,10 +165,7 @@ def create_ray_train_spec(cpu_per_job=1, config_name='noisy_sin', smoke_test=Fal
              object_store_memory=object_store_memory,
              local_mode=smoke_test)
 
-    # Get the model config
-    with open("/configs/regression_config.yml") as f:
-        regression_config = yaml.safe_load(f)
-    model_config = regression_config[config_name]
+    model_config = load_config(config_name)
 
     # Build the train_spec dict
     train_spec = {"resources_per_trial": {
@@ -159,46 +187,12 @@ def create_ray_train_spec(cpu_per_job=1, config_name='noisy_sin', smoke_test=Fal
     return train_spec
 
 
-def create_results_directory(train_spec):
-    """ Creates the results directory and a random experiment name.
-
-    This function creates the folder structure necessary for saving Ray results without
-    using the default ray_results directory.
-
-    Parameters
-    ----------
-    train_spec: dict
-        The training spec object used by Ray
-
-    Returns
-    -------
-    config_dir: Path
-        The path within the /results directory that relies on the train_spec['config']['name']
-    exp_name: str
-        Ranodom string
-
-    """
-    config_name = train_spec['config']['name']
-
-    # This is the equivalent of the ray_results directory commonly used in examples
-    config_dir = os.path.join(f"/results/{config_name}")
-
-    # Need a random experiment name
-    random_path = tempfile.NamedTemporaryFile()
-    exp_name = os.path.basename(random_path.name)
-
-    if os.path.exists(config_dir):
-        pass
-    else:
-        os.makedirs(config_dir)
-
-    return config_dir, exp_name
-
-
 def train_bootstrap_models(smoke_test=False):
     train_obj = create_ray_train_spec(smoke_test=smoke_test)
-    exp_dir, exp_name_dir = create_results_directory(train_obj)
-    analysis = tune.run(
+    exp_dir, exp_name_dir = create_results_directory(train_obj['config']['name'])
+
+    # This is where Ray.tune is called using the class that inherits from tune.Trainable
+    _ = tune.run(
         bootstrap_trainer,
         local_dir=exp_dir,
         name=exp_name_dir,
