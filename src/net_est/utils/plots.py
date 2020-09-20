@@ -2,8 +2,8 @@
 
 Contains functions for plotting results and standardizing plots
 
-
 """
+
 import numpy as np
 import os
 import matplotlib.pyplot as plt
@@ -141,6 +141,36 @@ def plot_prediction_interval(data, file_path, file_name):
     print(f"Saving prediction interval plot to {file_path}")
     save_plot(fig, file_path, file_name)
 
+
+def plot_sample_hist(data, file_path, file_name):
+    """ Visualizes what the training data looks like """
+
+    X_dist, X, Y, Y_sampled, Y_var = [data[x] for x in ['X_dist',
+                                                        'X',
+                                                        'Y',
+                                                        'Y_sampled',
+                                                        'Y_var']]
+    ix = np.argsort(X_dist)
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    fs = 18
+    ax = axes.ravel()
+    ax[0].hist(X_dist, bins=50, facecolor='g', alpha=0.5)
+    ax[0].set_xlabel('x', fontsize=fs)
+    set_plot(ax[0], labelsize=fs)
+
+    ax[1].plot(X, Y, 'k-', lw=0.5)
+    ax[1].scatter(X_dist, Y_sampled, c='r', s=4)
+    ax[1].set_ylim([-1, 1])
+    ax[1].set_xlabel('x', fontsize=fs)
+    set_plot(ax[1], labelsize=fs)
+
+    ax[2].plot(X_dist[ix], Y_var[ix], 'k-', lw=0.5)
+    ax[2].set_ylabel(r"$\sigma^2$", fontsize=fs)
+    ax[2].set_ylim([0, 0.02])
+    ax[2].set_xlabel('x', fontsize=fs)
+    set_plot(ax[2], labelsize=fs)
+    plt.tight_layout()
+    save_plot(fig, file_path=file_path, file_name=file_name)
 
 
 

@@ -11,7 +11,7 @@ from scipy import stats
 from scipy.integrate import quad
 import matplotlib.pyplot as plt
 
-from net_est.utils.plots import set_plot
+from net_est.utils.plots import plot_sample_hist
 
 
 class abs_value_dist(stats.rv_continuous):
@@ -112,30 +112,17 @@ def generate_training_data(n_samples=50, create_plot=False):
     sigma_e_squared_sampled, sigma_e_squared = noise_function(x_sampled)
     y_e = y + sigma_e_squared_sampled
 
-    # Create 2 Panel Plot
-    ix = np.argsort(x_sampled)
+    # Create 3 Panel Plot
+    x_grid = np.arange(-1, 1.0, 0.05)
     if create_plot:
-        fig, axes = plt.subplots(1, 3, figsize=(15, 5))
-        fs = 18
-        ax = axes.ravel()
-        ax[0].hist(x_sampled, bins=50, facecolor='g', alpha=0.5)
-        ax[0].set_xlabel('x', fontsize=fs)
-        set_plot(ax[0], labelsize=fs)
-
-        x_grid = np.arange(-1, 1.0, 0.05)
-        ax[1].plot(x_grid, target_function(x_grid), 'k-', lw=0.5)
-        ax[1].scatter(x_sampled, y_e, c='r', s=4)
-        ax[1].set_ylim([-1, 1])
-        ax[1].set_xlabel('x', fontsize=fs)
-        set_plot(ax[1], labelsize=fs)
-
-        ax[2].plot(x_sampled[ix], sigma_e_squared[ix], 'k-', lw=0.5)
-        ax[2].set_ylabel(r"$\sigma^2$", fontsize=fs)
-        ax[2].set_ylim([0, 0.02])
-        ax[2].set_xlabel('x', fontsize=fs)
-        set_plot(ax[2], labelsize=fs)
-        plt.tight_layout()
-        plt.savefig(os.path.join("/images", "training_data.png"))
+        plot_dict = {
+            'X_dist': x_sampled,
+            'X': x_grid,
+            'Y': target_function(x_grid),
+            'Y_sampled': y_e,
+            'Y_var': sigma_e_squared
+        }
+        plot_sample_hist(plot_dict, file_path='/images', file_name='training_data.png')
 
     return x_sampled, y_e
 
