@@ -11,6 +11,9 @@ The data generating process is based on the implementation provided in:
 ["A Study of the Bootstrap Method for Estimating the Accuracy of Artificial Neural
 Networks in Predicting Nuclear Transient Processes"](https://ieeexplore.ieee.org/document/1645061)
 
+The input data, x, is selected based on the probability distribution shown below (left panel), resulting in the sampled
+red points (middle panel).  The sample noise variance is dependent on x as shown in the right panel.
+
 <p align="center">
   <img src="./images/training_data.png" alt="Training Data" width="738">
 </p>
