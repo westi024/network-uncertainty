@@ -78,7 +78,7 @@ def plot_loss(history_result, loss_keys=None, file_path=None):
 
 
 def plot_prediction_interval(data, file_path, file_name):
-    """
+    """ Creates mean, sigma and 2 sigma prediction interval plot
 
     Parameters
     ----------
@@ -87,6 +87,10 @@ def plot_prediction_interval(data, file_path, file_name):
     file_path: path
     file_name: str
         The name used to save the plot
+
+    Returns
+    -------
+    None
 
     """
 
@@ -97,7 +101,8 @@ def plot_prediction_interval(data, file_path, file_name):
                                                             'sigma_squared']]
 
     ix = np.argsort(X)
-    fig, axes = plt.subplots(2, 1, figsize=(15, 15))
+    fs = 18
+    fig, axes = plt.subplots(2, 1, figsize=(15, 15), sharex=True)
     ax = axes.ravel()
 
     ax[0].plot(X[ix], y_mean[ix], 'k-', lw=1.0, label=r'$\hat{y}_{boot}$')
@@ -114,22 +119,26 @@ def plot_prediction_interval(data, file_path, file_name):
 
     # 2 Sigma Interval
     ax[0].fill_between(X[ix], y1=y_mean[ix] + y_std[ix],
-                       y2=y_mean + 2 * y_std[ix],
+                       y2=y_mean[ix] + 2 * y_std[ix],
                        facecolor='c',
                        label=r'$2\sigma$')
 
     ax[0].fill_between(X[ix], y1=y_mean[ix] - y_std[ix],
-                       y2=y_mean - 2 * y_std[ix],
+                       y2=y_mean[ix] - 2 * y_std[ix],
                        facecolor='c')
 
     ax[0].scatter(X[ix], Y[ix], c='k', marker='x', s=0.1)
-    ax[0].legend(fontsize=18)
+    ax[0].legend(fontsize=fs)
+    set_plot(ax[0], labelsize=fs)
 
     # Plot the variance
     ax[1].scatter(X[ix], y_std[ix]**2, c='r', s=4, label=r'$\hat{\sigma}}^2$')
     ax[1].plot(X[ix], sigma_squared[ix], 'k-', lw=0.5, label=r'$\sigma$')
+    ax[1].set_xlabel('X', fontsize=fs)
+    set_plot(ax[1], labelsize=fs)
 
     # Save the plot
+    print(f"Saving prediction interval plot to {file_path}")
     save_plot(fig, file_path, file_name)
 
 

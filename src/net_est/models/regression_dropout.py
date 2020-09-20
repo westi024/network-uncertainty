@@ -57,7 +57,7 @@ def dropout_regression(config_name='noisy_sin'):
         os.makedirs(os.path.join(exp_dir, exp_name_dir))
 
     # Build the network
-    model = net_build.noisy_sin_network(model_config, use_dropout=True, dropout_rate=0.2)
+    model = net_build.noisy_sin_network(model_config, use_dropout=True, dropout_rate=0.1)
 
     # Load the training/validation data
     x, y = generate_training_data(n_samples=1000)
@@ -88,7 +88,7 @@ def dropout_regression(config_name='noisy_sin'):
 def save_prediction_interval(model, file_path, file_name, n_iters=100):
     pred_func = predict_with_dropout(model)
     y_preds = []
-    x_test_values = np.arange(-1.0, 1.1, 0.05)
+    x_test_values = np.arange(-1.0, 1.1, 0.01)
     for iter in range(n_iters):
         y_preds.append(pred_func(x_test_values)[0])
 
@@ -104,7 +104,6 @@ def save_prediction_interval(model, file_path, file_name, n_iters=100):
     }
 
     plot_prediction_interval(plot_dict, file_path=file_path, file_name=file_name)
-
 
 
 if __name__ == '__main__':

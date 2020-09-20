@@ -14,7 +14,6 @@ import ray
 import json
 from ray import tune
 import tensorflow as tf
-import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split, KFold
 
 from net_est.data.data_generator import generate_training_data, noise_function
@@ -22,6 +21,7 @@ from net_est.utils.resource_config import configure_cpu_gpu_resources, create_re
 from net_est.models import network_builder as net_build
 from net_est.utils.timing import timer
 from net_est.utils.config_loader import load_config
+from net_est.utils.plots import plot_prediction_interval
 
 
 class bootstrap_trainer(tune.Trainable):
@@ -206,29 +206,15 @@ def save_model_results(model_dir):
     X, Y = generate_training_data(n_samples=500)
     Y_hat = ensemble.predict(X)
 
-    y_boot = np.squeeze(np.mean(np.array(Y_hat), axis=0))
-    var_boot = np.squeeze(np.var(np.array(Y_hat), axis=0))
+    plot_dict = {
+        'X': X,
+        'Y': Y,
+        'y_mean': np.squeeze(np.mean(np.array(Y_hat), axis=0)),
+        'y_std': np.squeeze(np.std(np.array(Y_hat), axis=0)),
+        'sigma_squared': noise_function(X)[1]
+    }
 
-    ix = np.argsort(X)
-    fig, axes = plt.subplots(2, 1, figsize=(15, 15))
-    ax = axes.ravel()
-
-    # Plot the prediction intervals out to 2 sigma
-    ax[0].plot(X[ix], y_boot[ix], 'k-', lw=1.0, label=r'$\hat{y}_{boot}$')
-    ax[0].fill_between(X[ix], y1=y_boot[ix], y2=y_boot[ix] + np.sqrt(var_boot[ix]), facecolor='y', label=r'$\sigma$')
-    ax[0].fill_between(X[ix], y1=y_boot[ix], y2=y_boot[ix] - np.sqrt(var_boot[ix]), facecolor='y')
-
-    ax[0].fill_between(X[ix], y1=y_boot[ix] + np.sqrt(var_boot[ix]),
-                       y2=y_boot[ix] + 2*np.sqrt(var_boot[ix]), facecolor='c', label=r'$2\sigma$')
-    ax[0].fill_between(X[ix], y1=y_boot[ix] - np.sqrt(var_boot[ix]),
-                       y2=y_boot[ix] - 2 * np.sqrt(var_boot[ix]), facecolor='c')
-
-    ax[0].scatter(X[ix], Y[[ix]], c='k', marker='x', s=0.1)
-    ax[0].legend(fontsize=18)
-    ax[1].scatter(X[ix], var_boot[ix], c='r', s=4, label=r'\hat{\sigma}^2')
-    ax[1].plot(X[ix], noise_function(X[ix])[1], 'k-', lw=0.5, label=r'\sigma^2')
-    print(f"Saving results to {model_dir}")
-    plt.savefig(os.path.join(model_dir, 'ensemble_pred.png'))
+    plot_prediction_interval(plot_dict, file_path=model_dir, file_name='ensemble_pred.png')
 
 
 def bootstrap_modeling(analyze_results=False, model_dir=None):
@@ -285,4 +271,4 @@ class EnsembleModel:
 
 if __name__ == '__main__':
     bootstrap_modeling(analyze_results=True,
-                       model_dir="/results/noisy_sin/tmppzm7llsl")
+                       model_dir="/results/noisy_sin/tmpfxwbhm0l")
