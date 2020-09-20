@@ -8,21 +8,45 @@ Ray will not be needed.
 import os
 import numpy as np
 import tensorflow as tf
+from tensorflow.keras import backend as K
 from sklearn.model_selection import train_test_split
 
 from net_est.utils.timing import timer
 from net_est.utils.config_loader import load_config
 from net_est.utils.resource_config import create_results_directory
-from net_est.utils.plots import plot_loss
+from net_est.utils.plots import plot_loss, plot_prediction_interval
 from net_est.models import network_builder as net_build
-from net_est.data.data_generator import generate_training_data
+from net_est.data.data_generator import generate_training_data, target_function, noise_function
 
 
+def predict_with_dropout(model):
+    """ Creates Keras backend function that enables the learning phase for making model predictions
 
+    Based on implementation at:
+    https://medium.com/hal24k-techblog/how-to-generate-neural-network-confidence-intervals-with-keras-e4c0b78ebbdf
+
+    Parameters
+    ----------
+    model: Model
+
+    Returns
+    -------
+    predict_function: Keras Function
+        Predicts model output with dropout enabled.
+    """
+
+    predict_function = K.function(model.inputs[K.learning_phase()],
+                                  model.outputs)
+    return predict_function
 
 
 def dropout_regression(config_name='noisy_sin'):
     """ Builds and trains a regression network with dropout
+
+    Parameters
+    ----------
+    config_name: str
+        Name in the configs/regression_config.yml
 
     """
     model_config = load_config(config_name=config_name)
@@ -47,7 +71,6 @@ def dropout_regression(config_name='noisy_sin'):
     # Shuffle and batch the datasets
     SHUFFLE_BUFFER_SIZE = 100
     BATCH_SIZE = model_config.get('batch_size', 64)
-
     train_data = train_data.shuffle(SHUFFLE_BUFFER_SIZE).batch(BATCH_SIZE)
     val_data = val_data.batch(BATCH_SIZE)
 
@@ -58,16 +81,31 @@ def dropout_regression(config_name='noisy_sin'):
 
     # Report training results
     save_path = os.path.join(exp_dir, exp_name_dir)
-    ax = plot_loss(history, loss_keys=['loss', 'val_loss'], file_path=save_path)
+    _ = plot_loss(history, loss_keys=['loss', 'val_loss'], file_path=save_path)
+    save_prediction_interval(model, file_path=save_path, file_name='dropout_interval.png')
 
-    # Generate more data and test with dropout enabled
+
+def save_prediction_interval(model, file_path, file_name, n_iters=100):
+    pred_func = predict_with_dropout(model)
+    y_preds = []
+    x_test_values = np.arange(-1.0, 1.1, 0.05)
+    for iter in range(n_iters):
+        y_preds.append(pred_func(x_test_values)[0])
+
+    y_target = noise_function(x_test_values)[0] + target_function(x_test_values)
+
+    # Need these values to plot prediction interval
+    plot_dict = {
+        'X': x_test_values,
+        'Y': y_target,
+        'y_mean': np.squeeze(np.mean(y_preds, axis=0)),
+        'y_std': np.squeeze(np.std(y_preds, axis=0)),
+        'sigma_squared': noise_function(x_test_values)[1]
+    }
+
+    plot_prediction_interval(plot_dict, file_path=file_path, file_name=file_name)
+
 
 
 if __name__ == '__main__':
     dropout_regression()
-
-
-
-
-
-
