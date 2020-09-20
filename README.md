@@ -1,12 +1,19 @@
-# network-uncertainty
-Compares uncertainty estimation procedures for neural network regression
+# Network Uncertainty
 
-This code implements portions of the paper:
+Network Uncertainty implements methods for estimating neural network prediction intervals for regression tasks.  Currently, 
+the following methods are provided:
+
+* Bootstrap (Ensemble Networks)
+* Dropout enabled during inference
+
+The data generating process is based on the implementation provided in: 
 
 ["A Study of the Bootstrap Method for Estimating the Accuracy of Artificial Neural
 Networks in Predicting Nuclear Transient Processes"](https://ieeexplore.ieee.org/document/1645061)
 
-specifically investigating different ways of creating prediction intervals.
+<p align="center">
+  <img src="./images/training_data.png" alt="Training Data" width="738">
+</p>
 
 ## Prerequisites
 All required packages are located in `Docker/requirements.txt`.  The preferred way of running this code is through a
