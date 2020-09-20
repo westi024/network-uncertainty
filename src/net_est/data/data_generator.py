@@ -118,7 +118,7 @@ def generate_training_data(n_samples=50, create_plot=False):
         fig, axes = plt.subplots(1, 3, figsize=(15, 5))
         fs = 18
         ax = axes.ravel()
-        ax[0].hist(x_sampled, bins=100)
+        ax[0].hist(x_sampled, bins=50, facecolor='g', alpha=0.5)
         ax[0].set_xlabel('x', fontsize=fs)
         set_plot(ax[0], labelsize=fs)
 
