@@ -20,8 +20,19 @@ red points (middle panel).  The sample noise variance is dependent on x as shown
 
 ## Prerequisites
 All required packages are located in `Docker/requirements.txt`.  The preferred way of running this code is through a
-docker container using `docker-compose.yml` and `net_est.dockerfile`.  To run the docker container the `.env` file must 
-be updated to your particular system paths. After updating `.env`, the following command will build the docker container:
+docker container using `docker-compose.yml` and `net_est.dockerfile`.  To run the docker container, you must add a `.env`
+file to the Docker directory with the following arguments updated:
+
+```markdown
+USER_ID=your_user_id
+GROUP_ID=your_group_id
+DEV_CODE='path\to\src\folder'
+DEV_IMAGE='path\to\images\folder'
+DEV_DATA='path\to\data\folder'
+DEV_CONFIG='path\to\configs\folder'
+DEV_RESULTS='path\to\results\folder'
+```
+After updating `.env`, the following command will build the docker container:
 
 ```markdown
 docker-compose -f docker-compose.yml up
