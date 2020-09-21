@@ -9,7 +9,7 @@ noisy_sin:
   kernel_init: 'glorot_uniform'
   kernel_reg: null
   optimizer: 'RMSProp'
-  epochs: 500
+  epochs: 100
   lr: 0.01
   n_models: 5
   batch_size: 64

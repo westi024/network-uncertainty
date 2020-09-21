@@ -14,6 +14,7 @@ import ray
 import json
 from ray import tune
 import tensorflow as tf
+from tensorflow.keras.callbacks import ModelCheckpoint
 from sklearn.model_selection import train_test_split, KFold
 
 from net_est.data.data_generator import generate_training_data, noise_function
@@ -52,11 +53,23 @@ class bootstrap_trainer(tune.Trainable):
 
     def step(self):
         """ Performs model training """
+        checkpoint_path = os.path.join(self.logdir, 'model.h5')
+        model_checkpoint_callback = ModelCheckpoint(
+            filepath=checkpoint_path,
+            save_weights_only=True,
+            monitor='val_loss',
+            mode='min',
+            save_best_only=True
+        )
+
         self.model.fit(self.train_data,
                        validation_data=self.val_data,
-                       epochs=self.config.get('epochs', 10))
+                       epochs=self.config.get('epochs', 10),
+                       callbacks=[model_checkpoint_callback])
 
         _, error = self.model.evaluate(self.val_data)
+
+        self.model.load_weights(checkpoint_path)
 
         return {'mse': error}
 
@@ -93,7 +106,7 @@ class bootstrap_trainer(tune.Trainable):
         self.model.load_weights(os.path.join(path, "model.h5"))
 
 
-def load_training_val_data(n_models=5, model_samples=500):
+def load_training_val_data(n_models=5, model_samples=5000):
     """  Calls data_generator.py to create the training data set.  Applies k-fold partitioning so models are
     trained on unique data sets.
 
@@ -240,7 +253,7 @@ def bootstrap_modeling(analyze_results=False, model_dir=None, config_name='noisy
             # Report Ensemble Results -- Create Figure 6 from paper
             save_model_results(model_dir)
     else:
-        model_dir = train_bootstrap_models(smoke_test=False, config_name=config_name)
+        model_dir = train_bootstrap_models(smoke_test=True, config_name=config_name)
         save_model_results(model_dir)
 
 
@@ -271,5 +284,5 @@ class EnsembleModel:
 
 
 if __name__ == '__main__':
-    bootstrap_modeling(analyze_results=True,
+    bootstrap_modeling(analyze_results=False,
                        model_dir="/results/noisy_sin/tmpfxwbhm0l")
