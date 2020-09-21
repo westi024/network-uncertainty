@@ -4,11 +4,20 @@ Main function for running scripts
 
 
 """
+# Set the working directory
 import os
 abs_path = os.path.abspath(__file__)
 dname = os.path.dirname(abs_path).split("net_est")[0]
 os.chdir(dname)
 
 from net_est.models.regression_dropout import dropout_regression
+from net_est.models.regression_bootstrap import bootstrap_modeling
+from net_est.utils.args_processing import get_args
 
-dropout_regression()
+args = get_args()
+if args.METHOD == 'dropout':
+    dropout_regression(args.config_name)
+elif args.METHOD == 'bootstrap':
+    bootstrap_modeling(config_name=args.config_name)
+else:
+    print("Still working on other methods for main.py")

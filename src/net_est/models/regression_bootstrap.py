@@ -187,8 +187,8 @@ def create_ray_train_spec(cpu_per_job=1, config_name='noisy_sin', smoke_test=Fal
     return train_spec
 
 
-def train_bootstrap_models(smoke_test=False):
-    train_obj = create_ray_train_spec(smoke_test=smoke_test)
+def train_bootstrap_models(smoke_test=False, config_name='noisy_sin'):
+    train_obj = create_ray_train_spec(smoke_test=smoke_test, config_name=config_name)
     exp_dir, exp_name_dir = create_results_directory(train_obj['config']['name'])
 
     # This is where Ray.tune is called using the class that inherits from tune.Trainable
@@ -217,7 +217,7 @@ def save_model_results(model_dir):
     plot_prediction_interval(plot_dict, file_path=model_dir, file_name='ensemble_pred.png')
 
 
-def bootstrap_modeling(analyze_results=False, model_dir=None):
+def bootstrap_modeling(analyze_results=False, model_dir=None, config_name='noisy_sin'):
     """ Main function for fitting and analyzing bootstrap models
 
     Parameters
@@ -226,6 +226,7 @@ def bootstrap_modeling(analyze_results=False, model_dir=None):
         Flag indicating if we only want to analyze previously trained model results
     model_dir: path
         The path to the model directory for analyzing results.  If analyze_results=False, this isn't used
+    config_name: str
 
     Returns
     -------
@@ -239,7 +240,7 @@ def bootstrap_modeling(analyze_results=False, model_dir=None):
             # Report Ensemble Results -- Create Figure 6 from paper
             save_model_results(model_dir)
     else:
-        model_dir = train_bootstrap_models(smoke_test=False)
+        model_dir = train_bootstrap_models(smoke_test=False, config_name=config_name)
         save_model_results(model_dir)
 
 

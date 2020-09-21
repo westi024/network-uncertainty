@@ -55,3 +55,13 @@ docker-compose -f docker-compose.yml run net_est
 <p align="center">
   <img src="./images/docker_result.png" alt="Interactive Docker" width="738">
 </p>
+
+Run the following command to start the bootstrap training:
+```markdown
+python -m main -config_name=noisy_sin -method=bootstrap
+```
+
+## Dropout
+```markdown
+python -m main -config_name=noisy_sin -method=dropout
+```
