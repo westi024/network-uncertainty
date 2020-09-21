@@ -5,18 +5,17 @@ This file provides data generators for the data generating processes outlined in
 Transient Processes"
 
 """
-import os
 import numpy as np
 from scipy import stats
 from scipy.integrate import quad
-import matplotlib.pyplot as plt
-
 from net_est.utils.plots import plot_sample_hist
 
 
 class abs_value_dist(stats.rv_continuous):
     """
-    Represents the input value distribution, Figure 1a from the paper
+    Represents the input value distribution, Figure 1a from the paper:
+    "A Study of the Bootstrap Method for Estimating the Accuracy of Artificial Neural Networks in Predicting Nuclear
+    Transient Processes"
 
     """
 
@@ -41,7 +40,9 @@ class abs_value_dist(stats.rv_continuous):
 def target_function(x):
     """ Target values
 
-    Equation 16 from paper
+    Equation 16 from:
+    "A Study of the Bootstrap Method for Estimating the Accuracy of Artificial Neural Networks in Predicting Nuclear
+    Transient Processes"
 
     Parameters
     ----------
@@ -60,7 +61,9 @@ def target_function(x):
 def noise_function(x):
     """ The Gaussian white noise function
 
-    Equation 17
+    Equation 17 from:
+    "A Study of the Bootstrap Method for Estimating the Accuracy of Artificial Neural Networks in Predicting Nuclear
+    Transient Processes"
     
     Parameters
     ----------

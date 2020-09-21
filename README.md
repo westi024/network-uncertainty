@@ -1,9 +1,17 @@
 # Network Uncertainty
 
+[![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/Naereen/StrapDown.js/blob/master/LICENSE)
+[![Python 3.7](https://img.shields.io/badge/python-3.7-blue.svg)](https://www.python.org/downloads/release/python-370/)
+[![Tensorflow](https://img.shields.io/badge/Tensorflow-2.3.0-red)](https://pypi.org/project/tensorflow/)
+
+
 Network Uncertainty implements methods for estimating neural network prediction intervals for regression tasks.  Currently, 
 the following methods are provided:
 
-* Bootstrap (Ensemble Networks)
+* Bootstrap (Pairs Sampling)
+* Delta
+* Mean-Variance Estimation
+* Bayesian
 * Dropout enabled during inference
 
 The data generating process is based on the implementation provided in: 
