@@ -9,6 +9,7 @@ import os
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import backend as K
+from tensorflow.keras.callbacks import ModelCheckpoint, ReduceLROnPlateau
 from sklearn.model_selection import train_test_split
 
 from net_est.utils.timing import timer
@@ -58,10 +59,12 @@ def dropout_regression(config_name='noisy_sin'):
         os.makedirs(os.path.join(exp_dir, exp_name_dir))
 
     # Build the network
-    model = net_build.noisy_sin_network(model_config, use_dropout=True, dropout_rate=0.3)
+    model = net_build.noisy_sin_network(model_config,
+                                        use_dropout=True,
+                                        dropout_rate=model_config.get('dropout_rate', 0.1))
 
     # Load the training/validation data
-    x, y = generate_training_data(n_samples=1000)
+    x, y = generate_training_data(n_samples=model_config.get('n_samples', 1000))
     x, y = [g[:, np.newaxis] for g in [x, y]]
 
     # Create a validation set we'll use for reporting errors across models
@@ -76,9 +79,33 @@ def dropout_regression(config_name='noisy_sin'):
     val_data = val_data.batch(BATCH_SIZE)
 
     # Train the network
+    checkpoint_path = os.path.join(exp_dir, exp_name_dir, 'model.h5')
+    callbacks = [
+        ModelCheckpoint(
+            filepath=checkpoint_path,
+            save_weights_only=True,
+            monitor='val_loss',
+            mode='min',
+            save_best_only=True
+        ),
+        ReduceLROnPlateau(
+            monitor='val_loss',
+            patience=model_config.get('patience', 10),
+            factor=model_config.get('lr_reduce_factor', 0.1),
+            verbose=1,
+            mode='auto',
+            min_delta=1e-3,
+            cooldown=model_config.get('cooldown', 2),
+            min_lr=model_config.get('min_lr', 1e-10)
+        )
+    ]
+
     history = model.fit(train_data,
                         validation_data=val_data,
-                        epochs=model_config.get('epochs', 10))
+                        epochs=model_config.get('epochs', 10),
+                        callbacks=callbacks)
+
+    model.load_weights(checkpoint_path)
 
     # Report training results
     save_path = os.path.join(exp_dir, exp_name_dir)
@@ -104,7 +131,7 @@ def save_prediction_interval(model, file_path, file_name, n_iters=1000):
     """
     pred_func = predict_with_dropout(model)
     y_preds = []
-    x_test_values = np.arange(-1.0, 1.1, 0.01)
+    x_test_values = np.arange(-1.0, 1.0, 0.01)
     for _ in range(n_iters):
         y_preds.append(pred_func(x_test_values)[0])
 

@@ -46,7 +46,7 @@ def target_function(x):
 
     Parameters
     ----------
-    x: 1darray
+    x: ndarray
         The input x values
 
     Returns
@@ -76,8 +76,7 @@ def noise_function(x):
         The error values to add to each truth value
 
     """
-    x_ = np.pi * x
-    sigma_e_squared = 0.0025 + (0.0025 * (1 + np.sin(x_))**2)
+    sigma_e_squared = 0.0025 + (0.0025 * (1 + np.sin(np.pi * x))**2)
     return np.random.normal(loc=0.0, scale=sigma_e_squared), sigma_e_squared
 
 
@@ -131,4 +130,6 @@ def generate_training_data(n_samples=50, create_plot=False):
 
 
 if __name__ == '__main__':
+    noise_function('10')
+
     x_data, y_data = generate_training_data(n_samples=1000, create_plot=True)

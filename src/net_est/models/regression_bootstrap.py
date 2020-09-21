@@ -14,7 +14,7 @@ import ray
 import json
 from ray import tune
 import tensorflow as tf
-from tensorflow.keras.callbacks import ModelCheckpoint
+from tensorflow.keras.callbacks import ModelCheckpoint, ReduceLROnPlateau
 from sklearn.model_selection import train_test_split, KFold
 
 from net_est.data.data_generator import generate_training_data, noise_function
@@ -39,6 +39,7 @@ class bootstrap_trainer(tune.Trainable):
     model: keras.Model
         The model for this fold of the training data
     """
+
     @timer
     def setup(self, config):
         """ Loads the training data and builds the model """
@@ -54,23 +55,33 @@ class bootstrap_trainer(tune.Trainable):
     def step(self):
         """ Performs model training """
         checkpoint_path = os.path.join(self.logdir, 'model.h5')
-        model_checkpoint_callback = ModelCheckpoint(
+        callbacks = [ModelCheckpoint(
             filepath=checkpoint_path,
             save_weights_only=True,
             monitor='val_loss',
             mode='min',
             save_best_only=True
-        )
-
+        ),
+            ReduceLROnPlateau(
+                monitor='val_loss',
+                patience=self.config.get('patience', 10),
+                factor=self.config.get('lr_reduce_factor', 0.1),
+                verbose=1,
+                mode='auto',
+                min_delta=1e-3,
+                cooldown=self.config.get('cooldown', 2),
+                min_lr=self.config.get('min_lr', 1e-10)
+            )
+        ]
         self.model.fit(self.train_data,
                        validation_data=self.val_data,
                        epochs=self.config.get('epochs', 10),
-                       callbacks=[model_checkpoint_callback])
+                       callbacks=callbacks)
 
         _, error = self.model.evaluate(self.val_data)
 
+        # Load the best model based on validation results
         self.model.load_weights(checkpoint_path)
-
         return {'mse': error}
 
     def load_data(self, config):
@@ -126,7 +137,7 @@ def load_training_val_data(n_models=5, model_samples=5000):
     if not isinstance(n_models, int):
         raise ValueError("The n_models argument must be an integer")
 
-    x, y = generate_training_data(n_samples=model_samples*n_models)
+    x, y = generate_training_data(n_samples=model_samples * n_models)
     x, y = [g[:, np.newaxis] for g in [x, y]]
 
     # Create a validation set we'll use for reporting errors across models
@@ -190,7 +201,8 @@ def create_ray_train_spec(cpu_per_job=1, config_name='noisy_sin', smoke_test=Fal
         'num_samples': 1}
 
     # Then load training data, don't need object store here, data is small
-    k_fold_training = load_training_val_data(n_models=model_config.get('n_models', 3))
+    k_fold_training = load_training_val_data(n_models=model_config.get('n_models', 3),
+                                             model_samples=model_config.get('n_samples', 1000))
     train_spec['config']['training_data'] = k_fold_training
     train_spec['config']['name'] = config_name
 
@@ -230,7 +242,7 @@ def save_model_results(model_dir):
     plot_prediction_interval(plot_dict, file_path=model_dir, file_name='ensemble_pred.png')
 
 
-def bootstrap_modeling(analyze_results=False, model_dir=None, config_name='noisy_sin'):
+def bootstrap_modeling(analyze_results=False, model_dir=None, config_name='noisy_sin', smoke_test=False):
     """ Main function for fitting and analyzing bootstrap models
 
     Parameters
@@ -240,6 +252,7 @@ def bootstrap_modeling(analyze_results=False, model_dir=None, config_name='noisy
     model_dir: path
         The path to the model directory for analyzing results.  If analyze_results=False, this isn't used
     config_name: str
+    smoke_test: bool
 
     Returns
     -------
@@ -253,7 +266,7 @@ def bootstrap_modeling(analyze_results=False, model_dir=None, config_name='noisy
             # Report Ensemble Results -- Create Figure 6 from paper
             save_model_results(model_dir)
     else:
-        model_dir = train_bootstrap_models(smoke_test=True, config_name=config_name)
+        model_dir = train_bootstrap_models(smoke_test=smoke_test, config_name=config_name)
         save_model_results(model_dir)
 
 
@@ -269,9 +282,10 @@ class EnsembleModel:
         model_ensemble = []
         for model_folder in os.listdir(self.model_dir):
             if os.path.isdir(os.path.join(self.model_dir, model_folder)):
-                model_ensemble.append(net_build.load_noisy_sin(model_directory=os.path.join(self.model_dir, model_folder),
-                                                               metric='mse',
-                                                               mode='min'))
+                model_ensemble.append(
+                    net_build.load_noisy_sin(model_directory=os.path.join(self.model_dir, model_folder),
+                                             metric='mse',
+                                             mode='min'))
         return model_ensemble
 
     def predict(self, x):

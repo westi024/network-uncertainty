@@ -18,6 +18,6 @@ args = get_args()
 if args.METHOD == 'dropout':
     dropout_regression(args.config_name)
 elif args.METHOD == 'bootstrap':
-    bootstrap_modeling(config_name=args.config_name)
+    bootstrap_modeling(config_name=args.config_name, smoke_test=args.SMOKE_TEST)
 else:
     print("Still working on other methods for main.py")

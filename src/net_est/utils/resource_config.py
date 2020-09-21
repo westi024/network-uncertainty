@@ -56,6 +56,8 @@ def create_results_directory(config_name):
         Random string
 
     """
+    if not isinstance(config_name, str):
+        raise TypeError(f"configuration name is of type {type(config_name)}, expected string")
 
     config_dir = os.path.join(f"/results/{config_name}")
 
