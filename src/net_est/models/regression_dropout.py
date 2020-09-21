@@ -40,6 +40,7 @@ def predict_with_dropout(model):
     return predict_function
 
 
+@timer
 def dropout_regression(config_name='noisy_sin'):
     """ Builds and trains a regression network with dropout
 
@@ -57,7 +58,7 @@ def dropout_regression(config_name='noisy_sin'):
         os.makedirs(os.path.join(exp_dir, exp_name_dir))
 
     # Build the network
-    model = net_build.noisy_sin_network(model_config, use_dropout=True, dropout_rate=0.1)
+    model = net_build.noisy_sin_network(model_config, use_dropout=True, dropout_rate=0.3)
 
     # Load the training/validation data
     x, y = generate_training_data(n_samples=1000)
@@ -85,11 +86,26 @@ def dropout_regression(config_name='noisy_sin'):
     save_prediction_interval(model, file_path=save_path, file_name='dropout_interval.png')
 
 
-def save_prediction_interval(model, file_path, file_name, n_iters=100):
+def save_prediction_interval(model, file_path, file_name, n_iters=1000):
+    """ Makes predictions with dropout enabled and saves the result
+
+    Parameters
+    ----------
+    model: keras Model
+        The trained neural network
+    file_path: path
+    file_name: str
+    n_iters: int
+
+    Returns
+    -------
+    None
+
+    """
     pred_func = predict_with_dropout(model)
     y_preds = []
     x_test_values = np.arange(-1.0, 1.1, 0.01)
-    for iter in range(n_iters):
+    for _ in range(n_iters):
         y_preds.append(pred_func(x_test_values)[0])
 
     y_target = noise_function(x_test_values)[0] + target_function(x_test_values)

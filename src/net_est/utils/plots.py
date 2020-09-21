@@ -67,7 +67,7 @@ def plot_loss(history_result, loss_keys=None, file_path=None):
     }
 
     for k in loss_keys:
-        ax.plot(history_result.epoch, history_result.history[k], lw=0.5, label=labels.get(k, k))
+        ax.semilogy(history_result.epoch, history_result.history[k], lw=0.5, label=labels.get(k, k))
 
     ax.set_xlabel('Epochs', fontsize=fs)
     ax = set_plot(ax, labelsize=fs)

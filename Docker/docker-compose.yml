@@ -5,6 +5,7 @@ services:
         build: 
             context: .
             dockerfile: net_est.dockerfile
+        working_dir: /code/net_est
         shm_size: '10gb'
         volumes: 
           - "${DEV_CODE}:/code"

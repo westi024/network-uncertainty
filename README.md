@@ -2,16 +2,16 @@
 
 [![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/Naereen/StrapDown.js/blob/master/LICENSE)
 [![Python 3.7](https://img.shields.io/badge/python-3.7-blue.svg)](https://www.python.org/downloads/release/python-370/)
-[![Tensorflow](https://img.shields.io/badge/Tensorflow-2.3.0-red)](https://pypi.org/project/tensorflow/)
+[![Tensorflow](https://img.shields.io/badge/Tensorflow-2.3.0-red.svg)](https://pypi.org/project/tensorflow/)
 
 
 Network Uncertainty implements methods for estimating neural network prediction intervals for regression tasks.  Currently, 
 the following methods are provided:
 
 * Bootstrap (Pairs Sampling)
-* Delta
-* Mean-Variance Estimation
-* Bayesian
+* Delta (TODO)
+* Mean-Variance Estimation (TODO)
+* Bayesian (TODO)
 * Dropout enabled during inference
 
 The data generating process is based on the implementation provided in: 
@@ -45,3 +45,13 @@ After updating `.env`, the following command will build the docker container:
 ```markdown
 docker-compose -f docker-compose.yml up
 ```
+
+## Bootstrap (Pairs Sampling)
+First, run the following command to get an interactive terminal within the docker container:
+```markdown
+docker-compose -f docker-compose.yml run net_est
+```
+
+<p align="center">
+  <img src="./images/docker_result.png" alt="Interactive Docker" width="738">
+</p>
