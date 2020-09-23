@@ -1,24 +1,85 @@
 noisy_sin:
-  networkType: 'feedforward'
-  input_shape: 1
-  output_shape: 1
-  hidden_layers: 5
-  nodes: [50, 50, 50, 50, 50]
-  activation: 'relu'
-  loss: 'mse'
-  kernel_init: 'glorot_uniform'
-  kernel_reg: null
-  optimizer: 'RMSProp'
-  epochs: 500
-  lr: 0.1
-  n_models: 5
-  n_samples: 5000
-  batch_size: 1024
-  patience: 5
-  dropout_rate: 0.1
-  training_iterations: 2
-  lr_reduce_factor: 0.1
-  cooldown: 2
-  min_lr: 1.0E-10
+  bootstrap:
+    networkType: 'feedforward'
+    input_shape: 1
+    output_shape: 1
+    hidden_layers: 5
+    nodes: [50, 50, 50, 50, 50]
+    activation: 'relu'
+    loss: 'mse'
+    kernel_init: 'glorot_uniform'
+    kernel_reg: null
+    optimizer: 'RMSProp'
+    epochs: 500
+    lr: 0.1
+    n_models: 5
+    n_samples: 5000
+    batch_size: 1024
+    patience: 5
+    dropout_rate: 0.1
+    training_iterations: 2
+    lr_reduce_factor: 0.1
+    cooldown: 2
+    min_lr: 1.0E-10
+  dropout:
+    networkType: 'feedforward'
+    input_shape: 1
+    output_shape: 1
+    hidden_layers: 5
+    nodes: [50, 50, 50, 50, 50]
+    activation: 'relu'
+    loss: 'mse'
+    kernel_init: 'glorot_uniform'
+    kernel_reg: null
+    optimizer: 'RMSProp'
+    epochs: 500
+    lr: 0.1
+    n_samples: 5000
+    batch_size: 1024
+    patience: 5
+    dropout_rate: 0.1
+    training_iterations: 2
+    lr_reduce_factor: 0.1
+    cooldown: 2
+    min_lr: 1.0E-10
+  mve:
+    networkType: 'feedforward'
+    n_samples: 1000
+    batch_size: 64
+    mean_network:
+      input_shape: 1
+      output_shape: 1
+      hidden_layers: 2
+      nodes: [50, 50]
+      activation: 'relu'
+      kernel_init: 'glorot_uniform'
+      kernel_reg: null
+      dropout_rate: 0.1
+      epochs: 100
+      lr: 0.1
+      patience: 5
+      lr_reduce_factor: 0.1
+      cooldown: 2
+      min_lr: 1.0E-10
+      optimizer: 'RMSProp'
+      loss: 'mse'
+    sigma_network:
+      input_shape: 1
+      output_shape: 1
+      hidden_layers: 2
+      nodes: [50, 50]
+      activation: 'relu'
+      kernel_init: 'glorot_uniform'
+      kernel_reg: null
+      dropout_rate: 0.1
+      epochs: 100
+      lr: 0.1
+      patience: 5
+      lr_reduce_factor: 0.1
+      cooldown: 2
+      min_lr: 1.0E-10
+      optimizer: 'RMSProp'
+      loss: 'log-likelihood'
+
 
 

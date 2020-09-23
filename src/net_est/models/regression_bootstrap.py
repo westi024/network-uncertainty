@@ -190,6 +190,7 @@ def create_ray_train_spec(cpu_per_job=1, config_name='noisy_sin', smoke_test=Fal
              local_mode=smoke_test)
 
     model_config = load_config(config_name)
+    model_config = model_config['bootstrap']
 
     # Build the train_spec dict
     train_spec = {"resources_per_trial": {

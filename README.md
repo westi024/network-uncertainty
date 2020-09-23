@@ -9,10 +9,8 @@ Network Uncertainty implements methods for estimating neural network prediction 
 the following methods are provided:
 
 * Bootstrap (Pairs Sampling)
-* Delta (TODO)
-* Mean-Variance Estimation (TODO)
-* Bayesian (TODO)
 * Dropout enabled during inference
+* Mean-Variance Estimation (TODO)
 
 The data generating process is based on the implementation provided in: 
 

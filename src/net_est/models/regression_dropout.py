@@ -52,6 +52,7 @@ def dropout_regression(config_name='noisy_sin'):
 
     """
     model_config = load_config(config_name=config_name)
+    model_config = model_config['dropout']
 
     # Create the experiment directory
     exp_dir, exp_name_dir = create_results_directory(config_name)

@@ -71,3 +71,11 @@ def create_results_directory(config_name):
         os.makedirs(config_dir)
 
     return config_dir, exp_name
+
+
+def setup_exp_directory(config_name):
+    exp_dir, exp_name_dir = create_results_directory(config_name)
+    if not os.path.exists(os.path.join(exp_dir, exp_name_dir)):
+        os.makedirs(os.path.join(exp_dir, exp_name_dir))
+
+    return exp_dir, exp_name_dir

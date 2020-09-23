@@ -7,7 +7,6 @@ Transient Processes"
 """
 import numpy as np
 from scipy import stats
-from scipy.integrate import quad
 from net_est.utils.plots import plot_sample_hist
 
 
@@ -18,6 +17,13 @@ class abs_value_dist(stats.rv_continuous):
     Transient Processes"
 
     """
+
+    def __init__(self, name):
+        super(abs_value_dist, self).__init__(name=name)
+
+        # Update the distribution support
+        self.a = -1.0
+        self.b = 1.0
 
     def _cdf(self, x):
         return np.where(x < 0.0, self.neg_cdf(x), self.pos_cdf(x))
@@ -54,6 +60,9 @@ def target_function(x):
     y: 1darray
         The target values
     """
+    if isinstance(x, list):
+        x = np.array(x)
+
     y = np.sin(np.pi * x) * np.cos((5/4) * np.pi * x)
     return y
 
@@ -76,6 +85,9 @@ def noise_function(x):
         The error values to add to each truth value
 
     """
+    if isinstance(x, list):
+        x = np.array(x)
+
     sigma_e_squared = 0.0025 + (0.0025 * (1 + np.sin(np.pi * x))**2)
     return np.random.normal(loc=0.0, scale=sigma_e_squared), sigma_e_squared
 
@@ -97,17 +109,12 @@ def generate_training_data(n_samples=50, create_plot=False):
     y: 1darray (n_samples, )
 
     """
+    if not isinstance(n_samples, int):
+        raise TypeError(f"Input n_samples is of type {type(n_samples)} but should be of type int")
 
     # This is the input value distribution, we'll sample from this
     x_dist = abs_value_dist(name='x_abs')
-    
-    # Update the distribution support
-    x_dist.a = -1.0
-    x_dist.b = 1.0
 
-    # This can be commented out, making sure we have a valid PDF.
-    print(f"Area Under PDF: {quad(x_dist.pdf, -1.0, 1.0)[0]}")
-    
     # Sample from the distribution
     x_sampled = x_dist.rvs(size=n_samples)
     y = target_function(x_sampled)
@@ -130,6 +137,4 @@ def generate_training_data(n_samples=50, create_plot=False):
 
 
 if __name__ == '__main__':
-    noise_function('10')
-
     x_data, y_data = generate_training_data(n_samples=1000, create_plot=True)
