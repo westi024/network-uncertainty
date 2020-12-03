@@ -62,7 +62,7 @@ def setup_training(config_name):
     return model_config, exp_dir, exp_name_dir
 
 
-def train_mve_networks(config_name='noisy_sin'):
+def mve_regression(config_name='noisy_sin'):
     """  First trains mean network using MSE loss then trains sigma network use log-likelihood. Both networks are
     trained at once after initial training to complete the 3 step training process.
 
@@ -163,4 +163,4 @@ def train_net(model, config, checkpoint_path, train_data, val_data):
 
 
 if __name__ == '__main__':
-    train_mve_networks()
+    mve_regression(config_name='noisy_sin')

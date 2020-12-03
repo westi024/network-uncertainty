@@ -2,7 +2,6 @@
 
 Main function for running scripts
 
-
 """
 # Set the working directory
 import os
@@ -12,9 +11,16 @@ os.chdir(dname)
 
 from net_est.models.regression_dropout import dropout_regression
 from net_est.models.regression_bootstrap import bootstrap_modeling
+from net_est.models.regression_mve import mve_regression
 from net_est.utils.args_processing import get_args
 
 args = get_args()
+implemented_methods = {
+    'bootstrap': bootstrap_modeling,
+    'dropout': dropout_regression,
+    'mve': mve_regression
+}
+
 if args.METHOD == 'dropout':
     dropout_regression(args.config_name)
 elif args.METHOD == 'bootstrap':

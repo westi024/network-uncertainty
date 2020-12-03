@@ -42,13 +42,15 @@ def predict_with_dropout(model):
 
 
 @timer
-def dropout_regression(config_name='noisy_sin'):
+def dropout_regression(config_name='noisy_sin', smoke_test=False):
     """ Builds and trains a regression network with dropout
 
     Parameters
     ----------
     config_name: str
         Name in the configs/regression_config.yml
+    smoke_test: bool
+        Flag indicating code testing
 
     """
     model_config = load_config(config_name=config_name)
