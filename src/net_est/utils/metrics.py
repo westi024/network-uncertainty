@@ -52,8 +52,8 @@ def mpiw(upper, lower):
     """
     if upper.ndim > 1:
         raise ValueError("Only 1D arrays implemented for mpiw metric")
-
-    return (1/upper.shape[0]) * np.sum(upper - lower, axis=0)
+    n_test = upper.shape[0]
+    return (1/n_test) * np.sum(upper - lower, axis=0)
 
 
 def nmpiw(mpiw, R):
