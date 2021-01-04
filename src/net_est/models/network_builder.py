@@ -48,7 +48,7 @@ def get_loss_function(params):
     elif params['loss'] == 'log-likelihood':
         loss = mve_log_loss
     else:
-        raise NotImplementedError("Only MSE implemented at this time")
+        raise NotImplementedError("Only MSE and log-likelihood implemented at this time")
     return loss
 
 
